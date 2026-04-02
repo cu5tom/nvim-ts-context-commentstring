@@ -57,9 +57,9 @@ function M.is_treesitter_active(bufnr)
   bufnr = bufnr or 0
 
   -- get_parser will throw an error if Treesitter is not set up for the buffer
-  local ok, _ = pcall(vim.treesitter.get_parser, bufnr)
+  local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
 
-  return ok
+  return ok and parser ~= nil
 end
 
 ---Get the node that is on the given location (default first non-whitespace
@@ -99,6 +99,10 @@ function M.get_node_at_cursor_start_of_line(only_languages, not_nested_languages
 
   -- default to top level language tree
   local language_tree = vim.treesitter.get_parser()
+  if not language_tree then
+    return
+  end
+
   -- Get the smallest supported language's tree with nodes inside the given range
   language_tree:for_each_tree(function(_, ltree)
     if
